@@ -1,0 +1,4405 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard | Perdas e Avarias</title>
+
+<!-- =====================================================
+     BIBLIOTECAS
+===================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+
+<!-- =====================================================
+     ESTILOS
+===================================================== -->
+
+<style>
+
+:root{
+
+    --bg:#f7f8fc;
+    --card:#ffffff;
+
+    --text:#293241;
+    --muted:#7b8494;
+
+    --border:#e9ecf2;
+
+    --purple:#8d83e6;
+    --purple-light:#d9d4ff;
+
+    --mint:#55b99a;
+    --mint-light:#ccefe3;
+
+    --orange:#ed9d67;
+    --orange-light:#ffe0ca;
+
+    --blue:#5d9bd8;
+    --blue-light:#d5eaff;
+
+    --pink:#df7898;
+    --pink-light:#ffdce8;
+
+    --yellow:#d7ae55;
+    --yellow-light:#fff0c5;
+
+    --shadow:0 8px 30px rgba(49,58,78,.07);
+
+    --radius:18px;
+}
+
+
+*{
+    box-sizing:border-box;
+}
+
+
+body{
+
+    margin:0;
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    background:var(--bg);
+
+    color:var(--text);
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header{
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f4f2ff 100%
+        );
+
+    border-bottom:
+        1px solid var(--border);
+
+    padding:
+        24px 0 20px;
+}
+
+
+.container{
+
+    width:min(1500px,94%);
+
+    margin:0 auto;
+}
+
+
+.header-inner{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+}
+
+
+.brand{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+}
+
+
+.logo{
+
+    width:52px;
+
+    height:52px;
+
+    border-radius:16px;
+
+    display:grid;
+
+    place-items:center;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple-light),
+            var(--pink-light)
+        );
+
+    font-size:25px;
+}
+
+
+h1{
+
+    margin:0;
+
+    font-size:25px;
+
+    letter-spacing:-.5px;
+}
+
+
+.subtitle{
+
+    color:var(--muted);
+
+    margin-top:4px;
+
+    font-size:13px;
+}
+
+
+.upload-btn{
+
+    border:0;
+
+    cursor:pointer;
+
+    background:#5c55a9;
+
+    color:white;
+
+    padding:12px 18px;
+
+    border-radius:12px;
+
+    font-weight:700;
+
+    box-shadow:
+        0 5px 18px rgba(92,85,169,.22);
+
+    transition:.2s;
+}
+
+
+.upload-btn:hover{
+
+    transform:translateY(-1px);
+
+    opacity:.94;
+}
+
+
+#fileInput{
+
+    display:none;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status{
+
+    margin-top:15px;
+
+    padding:11px 14px;
+
+    border-radius:11px;
+
+    background:#f2f0ff;
+
+    color:#665eab;
+
+    font-size:12px;
+
+    display:none;
+}
+
+
+/* =====================================================
+   FILTROS
+===================================================== */
+
+.filters{
+
+    margin:22px 0;
+
+    background:var(--card);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:var(--radius);
+
+    padding:17px;
+
+    box-shadow:var(--shadow);
+}
+
+
+.filter-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(5,1fr);
+
+    gap:12px;
+}
+
+
+.filter label{
+
+    display:block;
+
+    color:var(--muted);
+
+    font-size:11px;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+    margin-bottom:6px;
+
+    letter-spacing:.5px;
+}
+
+
+.filter select,
+.filter input{
+
+    width:100%;
+
+    border:
+        1px solid var(--border);
+
+    background:#fbfcfe;
+
+    border-radius:10px;
+
+    padding:10px 11px;
+
+    outline:none;
+
+    color:var(--text);
+}
+
+
+.filter select:focus,
+.filter input:focus{
+
+    border-color:var(--purple);
+}
+
+
+.filter-actions{
+
+    margin-top:11px;
+
+    display:flex;
+
+    gap:8px;
+}
+
+
+.secondary-btn{
+
+    border:
+        1px solid var(--border);
+
+    background:white;
+
+    color:var(--text);
+
+    cursor:pointer;
+
+    padding:10px 14px;
+
+    border-radius:10px;
+
+    font-weight:600;
+}
+
+
+.secondary-btn:hover{
+
+    background:#faf9ff;
+}
+
+
+/* =====================================================
+   KPIs
+===================================================== */
+
+.kpi-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(5,1fr);
+
+    gap:14px;
+
+    margin-bottom:18px;
+}
+
+
+.kpi{
+
+    background:white;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:var(--radius);
+
+    padding:18px;
+
+    box-shadow:var(--shadow);
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+
+.kpi::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:80px;
+
+    height:80px;
+
+    right:-25px;
+
+    top:-25px;
+
+    border-radius:50%;
+
+    opacity:.45;
+}
+
+
+.kpi.purple::after{
+    background:var(--purple-light);
+}
+
+.kpi.mint::after{
+    background:var(--mint-light);
+}
+
+.kpi.orange::after{
+    background:var(--orange-light);
+}
+
+.kpi.blue::after{
+    background:var(--blue-light);
+}
+
+.kpi.pink::after{
+    background:var(--pink-light);
+}
+
+
+.kpi-icon{
+
+    font-size:22px;
+}
+
+
+.kpi-label{
+
+    margin-top:12px;
+
+    color:var(--muted);
+
+    font-size:12px;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+}
+
+
+.kpi-value{
+
+    font-size:26px;
+
+    font-weight:800;
+
+    margin-top:4px;
+
+    letter-spacing:-.7px;
+}
+
+
+.kpi-small{
+
+    color:var(--muted);
+
+    font-size:11px;
+
+    margin-top:4px;
+}
+
+
+/* =====================================================
+   GRID
+===================================================== */
+
+.grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(12,1fr);
+
+    gap:16px;
+
+    margin-bottom:16px;
+}
+
+
+.card{
+
+    background:white;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+    padding:18px;
+
+    min-width:0;
+}
+
+
+.card-4{
+    grid-column:span 4;
+}
+
+.card-5{
+    grid-column:span 5;
+}
+
+.card-6{
+    grid-column:span 6;
+}
+
+.card-7{
+    grid-column:span 7;
+}
+
+.card-8{
+    grid-column:span 8;
+}
+
+.card-12{
+    grid-column:span 12;
+}
+
+
+.card-title{
+
+    font-size:15px;
+
+    font-weight:800;
+
+    margin:0 0 3px;
+}
+
+
+.card-subtitle{
+
+    font-size:11px;
+
+    color:var(--muted);
+
+    margin-bottom:15px;
+}
+
+
+.chart-container{
+
+    position:relative;
+
+    height:290px;
+}
+
+
+.chart-container.tall{
+
+    height:360px;
+}
+
+
+/* =====================================================
+   TABELAS
+===================================================== */
+
+.table-wrap{
+
+    overflow:auto;
+
+    max-height:430px;
+}
+
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    font-size:12px;
+}
+
+
+th{
+
+    text-align:left;
+
+    padding:10px 9px;
+
+    color:var(--muted);
+
+    font-size:10px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.4px;
+
+    background:#fafbfe;
+
+    position:sticky;
+
+    top:0;
+
+    z-index:1;
+}
+
+
+td{
+
+    padding:10px 9px;
+
+    border-top:
+        1px solid #f0f1f5;
+}
+
+
+tr:hover td{
+
+    background:#fcfcff;
+}
+
+
+.rank{
+
+    width:25px;
+
+    height:25px;
+
+    display:grid;
+
+    place-items:center;
+
+    border-radius:8px;
+
+    background:#f1f2f8;
+
+    font-weight:800;
+}
+
+
+.badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    padding:5px 8px;
+
+    border-radius:20px;
+
+    font-size:10px;
+
+    font-weight:800;
+}
+
+
+.badge-avaria{
+
+    background:#ffe0d1;
+
+    color:#b56739;
+}
+
+
+.badge-vencido{
+
+    background:#ffdce7;
+
+    color:#b04c6d;
+}
+
+
+.badge-retorno{
+
+    background:#d9efff;
+
+    color:#4e83b5;
+}
+
+
+/* =====================================================
+   PARETO
+===================================================== */
+
+.pareto-list{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:9px;
+}
+
+
+.pareto-row{
+
+    display:grid;
+
+    grid-template-columns:
+        160px
+        1fr
+        80px;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:11px;
+}
+
+
+.bar{
+
+    height:10px;
+
+    background:#eef0f5;
+
+    border-radius:20px;
+
+    overflow:hidden;
+}
+
+
+.bar span{
+
+    display:block;
+
+    height:100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple),
+            var(--pink)
+        );
+
+    border-radius:20px;
+}
+
+
+/* =====================================================
+   PRIORIDADE
+===================================================== */
+
+.priority-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:10px;
+}
+
+
+.priority{
+
+    padding:15px;
+
+    border-radius:14px;
+}
+
+
+.priority h4{
+
+    margin:0 0 8px;
+
+    font-size:13px;
+}
+
+
+.priority p{
+
+    margin:0;
+
+    font-size:11px;
+
+    color:var(--muted);
+
+    line-height:1.5;
+}
+
+
+.priority-critical{
+
+    background:#ffe1e8;
+}
+
+
+.priority-attention{
+
+    background:#ffebcf;
+}
+
+
+.priority-low{
+
+    background:#dcf4e9;
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.empty{
+
+    min-height:250px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+    color:var(--muted);
+}
+
+
+.empty-icon{
+
+    font-size:40px;
+
+    margin-bottom:12px;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer{
+
+    padding:25px 0 40px;
+
+    color:var(--muted);
+
+    font-size:11px;
+
+    text-align:center;
+}
+
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+
+@media(max-width:1100px){
+
+    .filter-grid{
+
+        grid-template-columns:
+            repeat(3,1fr);
+    }
+
+
+    .kpi-grid{
+
+        grid-template-columns:
+            repeat(3,1fr);
+    }
+
+
+    .card-4,
+    .card-5,
+    .card-6,
+    .card-7,
+    .card-8{
+
+        grid-column:span 6;
+    }
+}
+
+
+@media(max-width:700px){
+
+    .header-inner{
+
+        align-items:flex-start;
+
+        flex-direction:column;
+    }
+
+
+    .filter-grid,
+    .kpi-grid{
+
+        grid-template-columns:1fr;
+    }
+
+
+    .card-4,
+    .card-5,
+    .card-6,
+    .card-7,
+    .card-8,
+    .card-12{
+
+        grid-column:span 12;
+    }
+
+
+    .priority-grid{
+
+        grid-template-columns:1fr;
+    }
+
+
+    .pareto-row{
+
+        grid-template-columns:
+            100px
+            1fr
+            65px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header class="header">
+
+    <div class="container header-inner">
+
+        <div class="brand">
+
+            <div class="logo">
+                ð
+            </div>
+
+            <div>
+
+                <h1>
+                    Dashboard de Perdas e Avarias
+                </h1>
+
+                <div class="subtitle">
+                    AnÃ¡lise de produtos vencidos, avariados e retornos
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div>
+
+            <input
+                type="file"
+                id="fileInput"
+                accept=".xlsx,.xls,.csv"
+            >
+
+            <button
+                class="upload-btn"
+                onclick="document.getElementById('fileInput').click()"
+            >
+                â¬ Carregar nova base
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="container">
+
+
+<!-- =====================================================
+     STATUS
+===================================================== -->
+
+<div
+    id="status"
+    class="status"
+></div>
+
+
+<!-- =====================================================
+     FILTROS
+===================================================== -->
+
+<section class="filters">
+
+    <div class="filter-grid">
+
+
+        <div class="filter">
+
+            <label>
+                Data inicial
+            </label>
+
+            <input
+                type="date"
+                id="dateStart"
+            >
+
+        </div>
+
+
+        <div class="filter">
+
+            <label>
+                Data final
+            </label>
+
+            <input
+                type="date"
+                id="dateEnd"
+            >
+
+        </div>
+
+
+        <div class="filter">
+
+            <label>
+                Abastecedor
+            </label>
+
+            <select id="filterAbastecedor">
+
+                <option value="">
+                    Todos
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="filter">
+
+            <label>
+                Local
+            </label>
+
+            <select id="filterLocal">
+
+                <option value="">
+                    Todos
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="filter">
+
+            <label>
+                Tipo
+            </label>
+
+            <select id="filterTipo">
+
+                <option value="">
+                    Todos
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <div class="filter-actions">
+
+        <button
+            class="secondary-btn"
+            onclick="clearFilters()"
+        >
+            Limpar filtros
+        </button>
+
+
+        <button
+            class="secondary-btn"
+            onclick="exportCSV()"
+        >
+            â© Exportar dados filtrados
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     KPIs
+===================================================== -->
+
+<section class="kpi-grid">
+
+
+    <div class="kpi purple">
+
+        <div class="kpi-icon">
+            ð°
+        </div>
+
+        <div class="kpi-label">
+            Perda financeira
+        </div>
+
+        <div
+            class="kpi-value"
+            id="kpiCost"
+        >
+            R$ 0,00
+        </div>
+
+        <div
+            class="kpi-small"
+            id="kpiCostSub"
+        >
+            Carregue uma base
+        </div>
+
+    </div>
+
+
+    <div class="kpi mint">
+
+        <div class="kpi-icon">
+            ð¦
+        </div>
+
+        <div class="kpi-label">
+            Quantidade perdida
+        </div>
+
+        <div
+            class="kpi-value"
+            id="kpiQty"
+        >
+            0
+        </div>
+
+        <div class="kpi-small">
+            unidades
+        </div>
+
+    </div>
+
+
+    <div class="kpi orange">
+
+        <div class="kpi-icon">
+            ð¨
+        </div>
+
+        <div class="kpi-label">
+            OcorrÃªncias
+        </div>
+
+        <div
+            class="kpi-value"
+            id="kpiOccurrences"
+        >
+            0
+        </div>
+
+        <div class="kpi-small">
+            registros
+        </div>
+
+    </div>
+
+
+    <div class="kpi blue">
+
+        <div class="kpi-icon">
+            ð
+        </div>
+
+        <div class="kpi-label">
+            Perda mÃ©dia / dia
+        </div>
+
+        <div
+            class="kpi-value"
+            id="kpiDaily"
+        >
+            R$ 0,00
+        </div>
+
+        <div class="kpi-small">
+            mÃ©dia do perÃ­odo
+        </div>
+
+    </div>
+
+
+    <div class="kpi pink">
+
+        <div class="kpi-icon">
+            ð¯
+        </div>
+
+        <div class="kpi-label">
+            Custo mÃ©dio
+        </div>
+
+        <div
+            class="kpi-value"
+            id="kpiAverage"
+        >
+            R$ 0,00
+        </div>
+
+        <div class="kpi-small">
+            por ocorrÃªncia
+        </div>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     EVOLUÃÃO + TIPO
+===================================================== -->
+
+<section class="grid">
+
+
+    <div class="card card-8">
+
+        <h3 class="card-title">
+            EvoluÃ§Ã£o das perdas
+        </h3>
+
+        <div class="card-subtitle">
+            Custo financeiro registrado por dia
+        </div>
+
+        <div class="chart-container">
+
+            <canvas id="dailyChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <div class="card card-4">
+
+        <h3 class="card-title">
+            Tipos de perda
+        </h3>
+
+        <div class="card-subtitle">
+            ParticipaÃ§Ã£o financeira por tipo
+        </div>
+
+        <div class="chart-container">
+
+            <canvas id="typeChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     PRODUTOS + ABASTECEDORES
+===================================================== -->
+
+<section class="grid">
+
+
+    <div class="card card-6">
+
+        <h3 class="card-title">
+            Ranking de produtos
+        </h3>
+
+        <div class="card-subtitle">
+            Produtos com maior impacto financeiro
+        </div>
+
+        <div class="chart-container tall">
+
+            <canvas id="productChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <div class="card card-6">
+
+        <h3 class="card-title">
+            Ranking de abastecedores
+        </h3>
+
+        <div class="card-subtitle">
+            Perdas financeiras associadas ao abastecedor
+        </div>
+
+        <div class="chart-container tall">
+
+            <canvas id="supplierChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     LOCAIS + PRODUTO/TIPO
+===================================================== -->
+
+<section class="grid">
+
+
+    <div class="card card-6">
+
+        <h3 class="card-title">
+            Ranking de locais
+        </h3>
+
+        <div class="card-subtitle">
+            Locais com maior perda financeira
+        </div>
+
+        <div class="chart-container tall">
+
+            <canvas id="locationChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <div class="card card-6">
+
+        <h3 class="card-title">
+            Produto Ã tipo de perda
+        </h3>
+
+        <div class="card-subtitle">
+            IdentificaÃ§Ã£o das principais causas por produto
+        </div>
+
+        <div class="chart-container tall">
+
+            <canvas id="productTypeChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     PARETO + PRIORIDADE
+===================================================== -->
+
+<section class="grid">
+
+
+    <div class="card card-7">
+
+        <h3 class="card-title">
+            Pareto das perdas
+        </h3>
+
+        <div class="card-subtitle">
+            Produtos que concentram o maior prejuÃ­zo
+        </div>
+
+        <div
+            id="paretoList"
+            class="pareto-list"
+        >
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    ð
+                </div>
+
+                <div>
+                    Carregue uma base para visualizar o Pareto.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card card-5">
+
+        <h3 class="card-title">
+            AnÃ¡lise de prioridade
+        </h3>
+
+        <div class="card-subtitle">
+            PriorizaÃ§Ã£o baseada em impacto e recorrÃªncia
+        </div>
+
+
+        <div class="priority-grid">
+
+
+            <div class="priority priority-critical">
+
+                <h4>
+                    ð´ CrÃ­tico
+                </h4>
+
+                <p id="criticalText">
+                    Nenhum dado.
+                </p>
+
+            </div>
+
+
+            <div class="priority priority-attention">
+
+                <h4>
+                    ð  AtenÃ§Ã£o
+                </h4>
+
+                <p id="attentionText">
+                    Nenhum dado.
+                </p>
+
+            </div>
+
+
+            <div class="priority priority-low">
+
+                <h4>
+                    ð¢ Baixo
+                </h4>
+
+                <p id="lowText">
+                    Nenhum dado.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     TABELAS
+===================================================== -->
+
+<section class="grid">
+
+
+    <div class="card card-6">
+
+        <h3 class="card-title">
+            Top produtos
+        </h3>
+
+        <div class="card-subtitle">
+            Quantidade, custo e participaÃ§Ã£o
+        </div>
+
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+                        <th>Produto</th>
+                        <th>Qtd.</th>
+                        <th>Custo</th>
+                        <th>%</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="productTable"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <div class="card card-6">
+
+        <h3 class="card-title">
+            Top locais
+        </h3>
+
+        <div class="card-subtitle">
+            FrequÃªncia e impacto financeiro
+        </div>
+
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+                        <th>Local</th>
+                        <th>Ocorr.</th>
+                        <th>Qtd.</th>
+                        <th>Custo</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="locationTable"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     DETALHAMENTO
+===================================================== -->
+
+<section class="grid">
+
+
+    <div class="card card-12">
+
+        <h3 class="card-title">
+            Detalhamento das ocorrÃªncias
+        </h3>
+
+        <div class="card-subtitle">
+            Dados considerados no dashboard
+        </div>
+
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Data</th>
+                        <th>Abastecedor</th>
+                        <th>Local</th>
+                        <th>Produto</th>
+                        <th>Qtd.</th>
+                        <th>Tipo</th>
+                        <th>Custo</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="detailTable"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+</main>
+
+
+<footer class="footer">
+
+    Dashboard de Perdas e Avarias
+    â¢
+    AtualizaÃ§Ã£o dinÃ¢mica via Excel
+
+</footer>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+
+/* =====================================================
+   VARIÃVEIS
+===================================================== */
+
+let rawData = [];
+
+let filteredData = [];
+
+let charts = {};
+
+
+const COLORS = [
+
+    "#8d83e6",
+    "#55b99a",
+    "#ed9d67",
+    "#5d9bd8",
+    "#df7898",
+    "#d8b46a",
+    "#9a8ac7",
+    "#6db9b0",
+    "#e7a5bd",
+    "#7ea9cf"
+
+];
+
+
+/* =====================================================
+   NORMALIZA TEXTO
+===================================================== */
+
+function normalize(value){
+
+    return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"")
+        .trim()
+        .toUpperCase();
+
+}
+
+
+/* =====================================================
+   ESCAPA HTML
+===================================================== */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* =====================================================
+   FORMATA MOEDA
+===================================================== */
+
+function money(value){
+
+    return Number(value || 0)
+        .toLocaleString(
+            "pt-BR",
+            {
+                style:"currency",
+                currency:"BRL"
+            }
+        );
+
+}
+
+
+/* =====================================================
+   FORMATA NÃMERO
+===================================================== */
+
+function number(value){
+
+    return Number(value || 0)
+        .toLocaleString(
+            "pt-BR",
+            {
+                maximumFractionDigits:2
+            }
+        );
+
+}
+
+
+/* =====================================================
+   SOMA
+===================================================== */
+
+function sum(data,key){
+
+    return data.reduce(
+        (total,row)=>{
+
+            return total +
+                Number(row[key] || 0);
+
+        },
+        0
+    );
+
+}
+
+
+/* =====================================================
+   AGRUPAMENTO
+===================================================== */
+
+function groupBy(data,key){
+
+    const result={};
+
+
+    data.forEach(row=>{
+
+        const value =
+            String(row[key] || "")
+            .trim() ||
+            "NÃ£o informado";
+
+
+        if(!result[value]){
+
+            result[value]={
+
+                qtd:0,
+
+                custo:0,
+
+                ocorrencias:0
+
+            };
+
+        }
+
+
+        result[value].qtd +=
+            Number(row.qtd || 0);
+
+
+        result[value].custo +=
+            Number(row.custo || 0);
+
+
+        result[value].ocorrencias++;
+
+    });
+
+
+    return result;
+
+}
+
+
+/* =====================================================
+   PARSE DE NÃMEROS
+   CORREÃÃO PRINCIPAL
+===================================================== */
+
+function parseNumber(value){
+
+    /*
+     * CÃ©lula vazia
+     */
+
+    if(
+        value === null ||
+        value === undefined ||
+        value === ""
+    ){
+
+        return 0;
+
+    }
+
+
+    /*
+     * Valores negativos representados por "-"
+     */
+
+    if(
+        typeof value === "string" &&
+        value.trim() === "-"
+    ){
+
+        return 0;
+
+    }
+
+
+    /*
+     * ==================================================
+     * CORREÃÃO FUNDAMENTAL
+     *
+     * Quando o Excel entrega:
+     *
+     * 3.16
+     *
+     * isso jÃ¡ Ã© um nÃºmero decimal.
+     *
+     * NÃO devemos remover o ponto.
+     * ==================================================
+     */
+
+    if(typeof value === "number"){
+
+        return Number.isFinite(value)
+            ? value
+            : 0;
+
+    }
+
+
+    let text =
+        String(value)
+        .trim();
+
+
+    if(!text)
+        return 0;
+
+
+    /*
+     * Remove moeda e espaÃ§os.
+     */
+
+    text =
+        text
+        .replace(/R\$/gi,"")
+        .replace(/\s/g,"")
+        .replace(/[^\d,.\-]/g,"");
+
+
+    if(!text)
+        return 0;
+
+
+    /*
+     * Formato brasileiro:
+     *
+     * 1.234,56
+     *
+     * vira:
+     *
+     * 1234.56
+     */
+
+    if(
+        text.includes(".") &&
+        text.includes(",")
+    ){
+
+        text =
+            text
+            .replace(/\./g,"")
+            .replace(",",".");
+    }
+
+
+    /*
+     * Formato:
+     *
+     * 3,16
+     */
+
+    else if(text.includes(",")){
+
+        text =
+            text.replace(",",".");
+    }
+
+
+    /*
+     * Formato:
+     *
+     * 3.16
+     *
+     * permanece 3.16.
+     */
+
+    const result =
+        Number(text);
+
+
+    return Number.isFinite(result)
+        ? result
+        : 0;
+
+}
+
+
+/* =====================================================
+   PARSE DE DATA
+===================================================== */
+
+function parseDate(value){
+
+    if(
+        value === null ||
+        value === undefined ||
+        value === ""
+    ){
+
+        return null;
+
+    }
+
+
+    /*
+     * Excel serial date
+     */
+
+    if(typeof value === "number"){
+
+        const parsed =
+            XLSX.SSF.parse_date_code(value);
+
+
+        if(parsed){
+
+            return new Date(
+                parsed.y,
+                parsed.m - 1,
+                parsed.d
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /*
+     * Date
+     */
+
+    if(value instanceof Date){
+
+        return isNaN(value.getTime())
+            ? null
+            : value;
+
+    }
+
+
+    const text =
+        String(value).trim();
+
+
+    /*
+     * DD/MM/YYYY
+     */
+
+    const br =
+        text.match(
+            /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/
+        );
+
+
+    if(br){
+
+        const day =
+            Number(br[1]);
+
+        const month =
+            Number(br[2])-1;
+
+        const year =
+            Number(br[3]);
+
+
+        const date =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+
+        if(!isNaN(date.getTime()))
+            return date;
+
+    }
+
+
+    /*
+     * ISO ou outros formatos
+     */
+
+    const date =
+        new Date(text);
+
+
+    if(!isNaN(date.getTime()))
+        return date;
+
+
+    return null;
+
+}
+
+
+/* =====================================================
+   ISO DATE
+===================================================== */
+
+function isoDate(date){
+
+    if(!date)
+        return "";
+
+
+    const year =
+        date.getFullYear();
+
+
+    const month =
+        String(
+            date.getMonth()+1
+        ).padStart(2,"0");
+
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2,"0");
+
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+/* =====================================================
+   FORMATA DATA
+===================================================== */
+
+function formatDate(date){
+
+    if(!date)
+        return "";
+
+
+    return date.toLocaleDateString(
+        "pt-BR"
+    );
+
+}
+
+
+/* =====================================================
+   IDENTIFICA CABEÃALHO
+===================================================== */
+
+function findHeaderRow(rows){
+
+    for(
+        let i=0;
+        i<rows.length;
+        i++
+    ){
+
+        const row =
+            rows[i].map(normalize);
+
+
+        const hasAbastecedor =
+            row.includes("ABASTECEDOR");
+
+
+        const hasLocal =
+            row.includes("LOCAL");
+
+
+        const hasData =
+            row.includes("DATA");
+
+
+        const hasProduto =
+            row.includes("PRODUTO") ||
+            row.includes("PRODUTO PRINCIPAL");
+
+
+        const hasQuantidade =
+            row.includes("QUANT.") ||
+            row.includes("QUANT") ||
+            row.includes("QUANTIDADE");
+
+
+        const hasTipo =
+            row.includes("TIPO");
+
+
+        const hasCusto =
+            row.includes("CUSTO");
+
+
+        if(
+            hasAbastecedor &&
+            hasLocal &&
+            hasData &&
+            hasProduto &&
+            hasQuantidade &&
+            hasTipo &&
+            hasCusto
+        ){
+
+            return i;
+
+        }
+
+    }
+
+
+    return -1;
+
+}
+
+
+/* =====================================================
+   LÃ WORKBOOK
+===================================================== */
+
+function parseWorkbook(workbook){
+
+    let bestSheet=null;
+
+    let bestHeaderRow=-1;
+
+    let bestHeader=null;
+
+
+    /*
+     * Procura a tabela operacional
+     * em todas as abas.
+     */
+
+    workbook.SheetNames.forEach(
+        sheetName=>{
+
+            const sheet =
+                workbook.Sheets[sheetName];
+
+
+            const rows =
+                XLSX.utils.sheet_to_json(
+                    sheet,
+                    {
+                        header:1,
+                        defval:""
+                    }
+                );
+
+
+            for(
+                let i=0;
+                i<rows.length;
+                i++
+            ){
+
+                const row =
+                    rows[i].map(normalize);
+
+
+                const hasAbastecedor =
+                    row.includes("ABASTECEDOR");
+
+
+                const hasLocal =
+                    row.includes("LOCAL");
+
+
+                const hasData =
+                    row.includes("DATA");
+
+
+                const hasProduto =
+                    row.includes("PRODUTO") ||
+                    row.includes("PRODUTO PRINCIPAL");
+
+
+                const hasQuantidade =
+                    row.includes("QUANT.") ||
+                    row.includes("QUANT") ||
+                    row.includes("QUANTIDADE");
+
+
+                const hasTipo =
+                    row.includes("TIPO");
+
+
+                const hasCusto =
+                    row.includes("CUSTO");
+
+
+                if(
+                    hasAbastecedor &&
+                    hasLocal &&
+                    hasData &&
+                    hasProduto &&
+                    hasQuantidade &&
+                    hasTipo &&
+                    hasCusto
+                ){
+
+                    bestSheet=sheet;
+
+                    bestHeaderRow=i;
+
+                    bestHeader=row;
+
+                    break;
+
+                }
+
+            }
+
+        }
+    );
+
+
+    if(
+        !bestSheet ||
+        bestHeaderRow===-1
+    ){
+
+        alert(
+            "NÃ£o foi possÃ­vel localizar a tabela operacional.\n\n"+
+            "A base precisa conter:\n"+
+            "ABASTECEDOR, LOCAL, DATA, PRODUTO, QUANT., TIPO e CUSTO."
+        );
+
+        return [];
+
+    }
+
+
+    /*
+     * Encontra coluna
+     */
+
+    function findColumn(names){
+
+        for(const name of names){
+
+            const index =
+                bestHeader.indexOf(
+                    normalize(name)
+                );
+
+
+            if(index!==-1)
+                return index;
+
+        }
+
+
+        return -1;
+
+    }
+
+
+    const idx={
+
+        abastecedor:
+            findColumn([
+                "ABASTECEDOR"
+            ]),
+
+        local:
+            findColumn([
+                "LOCAL"
+            ]),
+
+        data:
+            findColumn([
+                "DATA"
+            ]),
+
+        produto:
+            findColumn([
+                "PRODUTO",
+                "PRODUTO PRINCIPAL"
+            ]),
+
+        qtd:
+            findColumn([
+                "QUANT.",
+                "QUANT",
+                "QUANTIDADE"
+            ]),
+
+        tipo:
+            findColumn([
+                "TIPO"
+            ]),
+
+        custo:
+            findColumn([
+                "CUSTO"
+            ])
+
+    };
+
+
+    const rows =
+        XLSX.utils.sheet_to_json(
+            bestSheet,
+            {
+                header:1,
+                defval:""
+            }
+        );
+
+
+    const result=[];
+
+
+    /*
+     * ComeÃ§a somente depois do cabeÃ§alho
+     */
+
+    for(
+        let i=bestHeaderRow+1;
+        i<rows.length;
+        i++
+    ){
+
+        const row=rows[i];
+
+
+        /*
+         * Data vÃ¡lida
+         */
+
+        const data =
+            parseDate(
+                row[idx.data]
+            );
+
+
+        /*
+         * Sem data:
+         * provavelmente Ã© ranking,
+         * total ou Ã¡rea auxiliar.
+         */
+
+        if(!data)
+            continue;
+
+
+        const abastecedor =
+            String(
+                row[idx.abastecedor] ?? ""
+            ).trim();
+
+
+        const local =
+            String(
+                row[idx.local] ?? ""
+            ).trim();
+
+
+        const produto =
+            String(
+                row[idx.produto] ?? ""
+            ).trim();
+
+
+        const tipo =
+            String(
+                row[idx.tipo] ?? ""
+            ).trim();
+
+
+        /*
+         * Produto obrigatÃ³rio
+         */
+
+        if(!produto)
+            continue;
+
+
+        const qtd =
+            parseNumber(
+                row[idx.qtd]
+            );
+
+
+        const custo =
+            parseNumber(
+                row[idx.custo]
+            );
+
+
+        result.push({
+
+            abastecedor:
+                abastecedor ||
+                "NÃ£o informado",
+
+            local:
+                local ||
+                "NÃ£o informado",
+
+            data:data,
+
+            produto:
+                produto ||
+                "NÃ£o informado",
+
+            qtd:qtd,
+
+            tipo:
+                tipo ||
+                "NÃ£o informado",
+
+            custo:custo
+
+        });
+
+    }
+
+
+    /*
+     * Log para conferÃªncia
+     */
+
+    console.log(
+        "================================="
+    );
+
+    console.log(
+        "DASHBOARD - BASE CARREGADA"
+    );
+
+    console.log(
+        "Registros:",
+        result.length
+    );
+
+    console.log(
+        "Quantidade:",
+        sum(result,"qtd")
+    );
+
+    console.log(
+        "Custo:",
+        sum(result,"custo")
+    );
+
+    console.log(
+        "================================="
+    );
+
+
+    return result;
+
+}
+
+
+/* =====================================================
+   UPLOAD
+===================================================== */
+
+document
+    .getElementById("fileInput")
+    .addEventListener(
+        "change",
+        function(event){
+
+            const file =
+                event.target.files[0];
+
+
+            if(!file)
+                return;
+
+
+            const status =
+                document.getElementById("status");
+
+
+            status.style.display="block";
+
+            status.textContent =
+                "Lendo a base de dados...";
+
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function(e){
+
+                    try{
+
+                        const workbook =
+                            XLSX.read(
+                                e.target.result,
+                                {
+                                    type:"array",
+                                    cellDates:true
+                                }
+                            );
+
+
+                        const data =
+                            parseWorkbook(
+                                workbook
+                            );
+
+
+                        if(!data.length){
+
+                            status.textContent =
+                                "Nenhum registro vÃ¡lido encontrado.";
+
+                            return;
+
+                        }
+
+
+                        rawData=data;
+
+                        filteredData=[
+                            ...rawData
+                        ];
+
+
+                        setupFilters();
+
+
+                        updateDashboard();
+
+
+                        status.textContent =
+                            `Base carregada com sucesso: ${
+                                rawData.length.toLocaleString("pt-BR")
+                            } registros.`;
+
+                    }
+
+
+                    catch(error){
+
+                        console.error(error);
+
+
+                        status.textContent =
+                            "Erro ao processar a base.";
+
+
+                        alert(
+                            "Ocorreu um erro ao ler a planilha.\n\n"+
+                            error.message
+                        );
+
+                    }
+
+                };
+
+
+            reader.readAsArrayBuffer(file);
+
+        }
+    );
+
+
+/* =====================================================
+   FILTROS
+===================================================== */
+
+function uniqueValues(key){
+
+    return [
+        ...new Set(
+            rawData
+                .map(
+                    row =>
+                        String(
+                            row[key] ?? ""
+                        ).trim()
+                )
+                .filter(Boolean)
+        )
+    ]
+    .sort(
+        (a,b)=>
+            a.localeCompare(
+                b,
+                "pt-BR"
+            )
+    );
+
+}
+
+
+/* =====================================================
+   POPULA SELECT
+===================================================== */
+
+function populateSelect(
+    id,
+    values
+){
+
+    const select =
+        document.getElementById(id);
+
+
+    select.innerHTML =
+        '<option value="">Todos</option>';
+
+
+    values.forEach(value=>{
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+
+        option.value=value;
+
+        option.textContent=value;
+
+
+        select.appendChild(option);
+
+    });
+
+}
+
+
+/* =====================================================
+   CONFIGURA FILTROS
+===================================================== */
+
+function setupFilters(){
+
+    populateSelect(
+        "filterAbastecedor",
+        uniqueValues("abastecedor")
+    );
+
+
+    populateSelect(
+        "filterLocal",
+        uniqueValues("local")
+    );
+
+
+    populateSelect(
+        "filterTipo",
+        uniqueValues("tipo")
+    );
+
+
+    if(rawData.length){
+
+        const dates =
+            rawData
+                .map(
+                    row=>row.data
+                )
+                .filter(Boolean);
+
+
+        if(dates.length){
+
+            const minTime =
+                Math.min(
+                    ...dates.map(
+                        d=>d.getTime()
+                    )
+                );
+
+
+            const maxTime =
+                Math.max(
+                    ...dates.map(
+                        d=>d.getTime()
+                    )
+                );
+
+
+            const minDate =
+                new Date(minTime);
+
+
+            const maxDate =
+                new Date(maxTime);
+
+
+            document
+                .getElementById(
+                    "dateStart"
+                )
+                .value =
+                isoDate(minDate);
+
+
+            document
+                .getElementById(
+                    "dateEnd"
+                )
+                .value =
+                isoDate(maxDate);
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   EVENTOS FILTROS
+===================================================== */
+
+[
+    "dateStart",
+    "dateEnd",
+    "filterAbastecedor",
+    "filterLocal",
+    "filterTipo"
+]
+.forEach(id=>{
+
+    document
+        .getElementById(id)
+        .addEventListener(
+            "change",
+            applyFilters
+        );
+
+});
+
+
+/* =====================================================
+   APLICA FILTROS
+===================================================== */
+
+function applyFilters(){
+
+    const start =
+        document
+            .getElementById(
+                "dateStart"
+            )
+            .value;
+
+
+    const end =
+        document
+            .getElementById(
+                "dateEnd"
+            )
+            .value;
+
+
+    const abastecedor =
+        document
+            .getElementById(
+                "filterAbastecedor"
+            )
+            .value;
+
+
+    const local =
+        document
+            .getElementById(
+                "filterLocal"
+            )
+            .value;
+
+
+    const tipo =
+        document
+            .getElementById(
+                "filterTipo"
+            )
+            .value;
+
+
+    filteredData =
+        rawData.filter(row=>{
+
+            const rowDate =
+                isoDate(row.data);
+
+
+            if(
+                start &&
+                rowDate < start
+            )
+                return false;
+
+
+            if(
+                end &&
+                rowDate > end
+            )
+                return false;
+
+
+            if(
+                abastecedor &&
+                row.abastecedor !== abastecedor
+            )
+                return false;
+
+
+            if(
+                local &&
+                row.local !== local
+            )
+                return false;
+
+
+            if(
+                tipo &&
+                row.tipo !== tipo
+            )
+                return false;
+
+
+            return true;
+
+        });
+
+
+    updateDashboard();
+
+}
+
+
+/* =====================================================
+   LIMPA FILTROS
+===================================================== */
+
+function clearFilters(){
+
+    document
+        .getElementById(
+            "filterAbastecedor"
+        )
+        .value="";
+
+
+    document
+        .getElementById(
+            "filterLocal"
+        )
+        .value="";
+
+
+    document
+        .getElementById(
+            "filterTipo"
+        )
+        .value="";
+
+
+    setupFilters();
+
+
+    filteredData=[
+        ...rawData
+    ];
+
+
+    updateDashboard();
+
+}
+
+
+/* =====================================================
+   DESTROI GRÃFICO
+===================================================== */
+
+function destroyChart(name){
+
+    if(charts[name]){
+
+        charts[name].destroy();
+
+        charts[name]=null;
+
+    }
+
+}
+
+
+/* =====================================================
+   KPIs
+===================================================== */
+
+function updateKPIs(){
+
+    const totalCost =
+        sum(
+            filteredData,
+            "custo"
+        );
+
+
+    const totalQty =
+        sum(
+            filteredData,
+            "qtd"
+        );
+
+
+    const occurrences =
+        filteredData.length;
+
+
+    const uniqueDays =
+        new Set(
+            filteredData.map(
+                row=>isoDate(row.data)
+            )
+        ).size;
+
+
+    const daily =
+        uniqueDays
+            ? totalCost / uniqueDays
+            : 0;
+
+
+    const average =
+        occurrences
+            ? totalCost / occurrences
+            : 0;
+
+
+    document
+        .getElementById(
+            "kpiCost"
+        )
+        .textContent =
+        money(totalCost);
+
+
+    document
+        .getElementById(
+            "kpiQty"
+        )
+        .textContent =
+        number(totalQty);
+
+
+    document
+        .getElementById(
+            "kpiOccurrences"
+        )
+        .textContent =
+        number(occurrences);
+
+
+    document
+        .getElementById(
+            "kpiDaily"
+        )
+        .textContent =
+        money(daily);
+
+
+    document
+        .getElementById(
+            "kpiAverage"
+        )
+        .textContent =
+        money(average);
+
+
+    document
+        .getElementById(
+            "kpiCostSub"
+        )
+        .textContent =
+        uniqueDays
+            ? `${uniqueDays} ${
+                uniqueDays===1
+                    ? "dia"
+                    : "dias"
+              } analisados`
+            : "Nenhum registro";
+
+}
+
+
+/* =====================================================
+   GRÃFICO DIÃRIO
+===================================================== */
+
+function dailyChart(){
+
+    destroyChart("daily");
+
+
+    const groups={};
+
+
+    filteredData.forEach(row=>{
+
+        const key =
+            isoDate(row.data);
+
+
+        if(!groups[key])
+            groups[key]=0;
+
+
+        groups[key] +=
+            row.custo;
+
+    });
+
+
+    const labels =
+        Object.keys(groups)
+            .sort();
+
+
+    const values =
+        labels.map(
+            key=>groups[key]
+        );
+
+
+    charts.daily =
+        new Chart(
+            document.getElementById(
+                "dailyChart"
+            ),
+            {
+
+                type:"line",
+
+                data:{
+
+                    labels:
+                        labels.map(key=>{
+
+                            const d =
+                                new Date(
+                                    key+"T00:00:00"
+                                );
+
+
+                            return d.toLocaleDateString(
+                                "pt-BR",
+                                {
+                                    day:"2-digit",
+                                    month:"2-digit"
+                                }
+                            );
+
+                        }),
+
+
+                    datasets:[{
+
+                        label:"Perda",
+
+                        data:values,
+
+                        borderColor:
+                            "#8d83e6",
+
+                        backgroundColor:
+                            "rgba(141,131,230,.12)",
+
+                        fill:true,
+
+                        tension:.35,
+
+                        pointRadius:4,
+
+                        pointHoverRadius:6
+
+                    }]
+
+                },
+
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+
+                    plugins:{
+
+                        legend:{
+                            display:false
+                        },
+
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    context =>
+                                        " " +
+                                        money(
+                                            context.raw
+                                        )
+
+                            }
+
+                        }
+
+                    },
+
+
+                    scales:{
+
+                        y:{
+
+                            beginAtZero:true,
+
+                            ticks:{
+
+                                callback:
+                                    value =>
+                                        money(value)
+
+                            },
+
+                            grid:{
+
+                                color:
+                                    "#f0f1f5"
+
+                            }
+
+                        },
+
+
+                        x:{
+
+                            grid:{
+                                display:false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   TIPO
+===================================================== */
+
+function typeChart(){
+
+    destroyChart("type");
+
+
+    const groups =
+        groupBy(
+            filteredData,
+            "tipo"
+        );
+
+
+    const labels =
+        Object.keys(groups);
+
+
+    const values =
+        labels.map(
+            x=>groups[x].custo
+        );
+
+
+    charts.type =
+        new Chart(
+            document.getElementById(
+                "typeChart"
+            ),
+            {
+
+                type:"doughnut",
+
+                data:{
+
+                    labels:labels,
+
+                    datasets:[{
+
+                        data:values,
+
+                        backgroundColor:
+                            COLORS,
+
+                        borderWidth:3,
+
+                        borderColor:"#fff"
+
+                    }]
+
+                },
+
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    cutout:"68%",
+
+
+                    plugins:{
+
+                        legend:{
+
+                            position:"bottom",
+
+                            labels:{
+
+                                usePointStyle:true,
+
+                                padding:14
+
+                            }
+
+                        },
+
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    context =>
+                                        " " +
+                                        context.label +
+                                        ": " +
+                                        money(
+                                            context.raw
+                                        )
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   RANKING
+===================================================== */
+
+function rankingChart(
+    canvasId,
+    name,
+    key
+){
+
+    destroyChart(name);
+
+
+    const groups =
+        groupBy(
+            filteredData,
+            key
+        );
+
+
+    const entries =
+        Object.entries(groups)
+            .sort(
+                (a,b)=>
+                    b[1].custo -
+                    a[1].custo
+            )
+            .slice(0,10);
+
+
+    const labels =
+        entries.map(
+            x=>x[0]
+        );
+
+
+    const values =
+        entries.map(
+            x=>x[1].custo
+        );
+
+
+    charts[name] =
+        new Chart(
+            document.getElementById(
+                canvasId
+            ),
+            {
+
+                type:"bar",
+
+                data:{
+
+                    labels:labels,
+
+                    datasets:[{
+
+                        label:"Custo",
+
+                        data:values,
+
+                        backgroundColor:
+                            COLORS.slice(
+                                0,
+                                values.length
+                            ),
+
+                        borderRadius:8,
+
+                        borderSkipped:false
+
+                    }]
+
+                },
+
+
+                options:{
+
+                    indexAxis:"y",
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+
+                    plugins:{
+
+                        legend:{
+                            display:false
+                        },
+
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    context =>
+                                        " " +
+                                        money(
+                                            context.raw
+                                        )
+
+                            }
+
+                        }
+
+                    },
+
+
+                    scales:{
+
+                        x:{
+
+                            beginAtZero:true,
+
+                            ticks:{
+
+                                callback:
+                                    value =>
+                                        money(value)
+
+                            },
+
+                            grid:{
+
+                                color:
+                                    "#f0f1f5"
+
+                            }
+
+                        },
+
+
+                        y:{
+
+                            grid:{
+                                display:false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   PRODUTO Ã TIPO
+===================================================== */
+
+function productTypeChart(){
+
+    destroyChart(
+        "productType"
+    );
+
+
+    const products =
+        Object.entries(
+            groupBy(
+                filteredData,
+                "produto"
+            )
+        )
+        .sort(
+            (a,b)=>
+                b[1].custo -
+                a[1].custo
+        )
+        .slice(0,8)
+        .map(
+            x=>x[0]
+        );
+
+
+    const types =
+        [
+            ...new Set(
+                filteredData.map(
+                    r=>r.tipo
+                )
+            )
+        ];
+
+
+    const datasets =
+        types.map(
+            (tipo,index)=>{
+
+                return {
+
+                    label:tipo,
+
+
+                    data:
+                        products.map(
+                            product =>
+
+                                filteredData
+                                    .filter(
+                                        r =>
+                                            r.produto === product &&
+                                            r.tipo === tipo
+                                    )
+                                    .reduce(
+                                        (s,r)=>
+                                            s+r.custo,
+                                        0
+                                    )
+                        ),
+
+
+                    backgroundColor:
+                        COLORS[
+                            index %
+                            COLORS.length
+                        ],
+
+
+                    borderRadius:6
+
+                };
+
+            }
+        );
+
+
+    charts.productType =
+        new Chart(
+            document.getElementById(
+                "productTypeChart"
+            ),
+            {
+
+                type:"bar",
+
+                data:{
+
+                    labels:products,
+
+                    datasets:datasets
+
+                },
+
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+
+                    plugins:{
+
+                        legend:{
+
+                            position:"bottom"
+
+                        },
+
+
+                        tooltip:{
+
+                            callbacks:{
+
+                                label:
+                                    context =>
+                                        " " +
+                                        context.dataset.label +
+                                        ": " +
+                                        money(
+                                            context.raw
+                                        )
+
+                            }
+
+                        }
+
+                    },
+
+
+                    scales:{
+
+                        y:{
+
+                            beginAtZero:true,
+
+                            ticks:{
+
+                                callback:
+                                    value =>
+                                        money(value)
+
+                            },
+
+                            grid:{
+
+                                color:
+                                    "#f0f1f5"
+
+                            }
+
+                        },
+
+
+                        x:{
+
+                            grid:{
+                                display:false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   PARETO
+===================================================== */
+
+function updatePareto(){
+
+    const container =
+        document.getElementById(
+            "paretoList"
+        );
+
+
+    container.innerHTML="";
+
+
+    if(!filteredData.length){
+
+        container.innerHTML=`
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    ð
+                </div>
+
+                <div>
+                    Nenhum dado para analisar.
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const total =
+        sum(
+            filteredData,
+            "custo"
+        );
+
+
+    const groups =
+        groupBy(
+            filteredData,
+            "produto"
+        );
+
+
+    const entries =
+        Object.entries(groups)
+            .sort(
+                (a,b)=>
+                    b[1].custo -
+                    a[1].custo
+            )
+            .slice(0,12);
+
+
+    let accumulated=0;
+
+
+    entries.forEach(
+        ([product,data])=>{
+
+            accumulated +=
+                data.custo;
+
+
+            const percentage =
+                total
+                    ? data.custo /
+                      total *
+                      100
+                    : 0;
+
+
+            const cumulative =
+                total
+                    ? accumulated /
+                      total *
+                      100
+                    : 0;
+
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className=
+                "pareto-row";
+
+
+            const shortName =
+                product.length>25
+                    ? product.substring(
+                        0,
+                        25
+                      )+"â¦"
+                    : product;
+
+
+            row.innerHTML=`
+
+                <div title="${escapeHTML(product)}">
+                    ${escapeHTML(shortName)}
+                </div>
+
+                <div class="bar">
+                    <span
+                        style="
+                            width:${Math.min(
+                                percentage,
+                                100
+                            )}%
+                        "
+                    ></span>
+                </div>
+
+                <div style="text-align:right">
+
+                    ${percentage.toFixed(1)}%
+
+                    <br>
+
+                    <span
+                        style="
+                            font-size:9px;
+                            color:#999
+                        "
+                    >
+                        acum.
+                        ${cumulative.toFixed(1)}%
+                    </span>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(row);
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   PRIORIDADE
+===================================================== */
+
+function updatePriority(){
+
+    const groups =
+        groupBy(
+            filteredData,
+            "produto"
+        );
+
+
+    const entries =
+        Object.entries(groups)
+            .map(
+                ([name,data])=>({
+
+                    name,
+
+                    ...data
+
+                })
+            )
+            .sort(
+                (a,b)=>
+                    b.custo -
+                    a.custo
+            );
+
+
+    if(!entries.length){
+
+        document.getElementById(
+            "criticalText"
+        ).textContent =
+            "Nenhum dado.";
+
+        document.getElementById(
+            "attentionText"
+        ).textContent =
+            "Nenhum dado.";
+
+        document.getElementById(
+            "lowText"
+        ).textContent =
+            "Nenhum dado.";
+
+        return;
+
+    }
+
+
+    const maxCost =
+        entries[0].custo;
+
+
+    const critical =
+        entries.filter(
+            x =>
+                x.custo >=
+                    maxCost * .60
+                &&
+                x.ocorrencias >= 3
+        );
+
+
+    const attention =
+        entries.filter(
+            x =>
+                !critical.includes(x)
+                &&
+                (
+                    x.custo >=
+                        maxCost * .25
+                    ||
+                    x.ocorrencias >= 3
+                )
+        );
+
+
+    const low =
+        entries.filter(
+            x =>
+                !critical.includes(x)
+                &&
+                !attention.includes(x)
+        );
+
+
+    function names(list){
+
+        if(!list.length)
+            return "Nenhum item identificado.";
+
+
+        return list
+            .slice(0,4)
+            .map(
+                x=>x.name
+            )
+            .join(", ")
+            +
+            (
+                list.length>4
+                    ? "â¦"
+                    : ""
+            );
+
+    }
+
+
+    document.getElementById(
+        "criticalText"
+    ).textContent =
+        names(critical);
+
+
+    document.getElementById(
+        "attentionText"
+    ).textContent =
+        names(attention);
+
+
+    document.getElementById(
+        "lowText"
+    ).textContent =
+        names(low);
+
+}
+
+
+/* =====================================================
+   TABELA PRODUTOS
+===================================================== */
+
+function updateProductTable(){
+
+    const tbody =
+        document.getElementById(
+            "productTable"
+        );
+
+
+    tbody.innerHTML="";
+
+
+    const total =
+        sum(
+            filteredData,
+            "custo"
+        );
+
+
+    const groups =
+        groupBy(
+            filteredData,
+            "produto"
+        );
+
+
+    const entries =
+        Object.entries(groups)
+            .sort(
+                (a,b)=>
+                    b[1].custo -
+                    a[1].custo
+            )
+            .slice(0,15);
+
+
+    entries.forEach(
+        ([name,data],index)=>{
+
+            const percentage =
+                total
+                    ? data.custo /
+                      total *
+                      100
+                    : 0;
+
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.innerHTML=`
+
+                <td>
+                    <span class="rank">
+                        ${index+1}
+                    </span>
+                </td>
+
+                <td>
+                    <strong>
+                        ${escapeHTML(name)}
+                    </strong>
+                </td>
+
+                <td>
+                    ${number(data.qtd)}
+                </td>
+
+                <td>
+                    ${money(data.custo)}
+                </td>
+
+                <td>
+                    ${percentage.toFixed(1)}%
+                </td>
+
+            `;
+
+
+            tbody.appendChild(tr);
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   TABELA LOCAIS
+===================================================== */
+
+function updateLocationTable(){
+
+    const tbody =
+        document.getElementById(
+            "locationTable"
+        );
+
+
+    tbody.innerHTML="";
+
+
+    const groups =
+        groupBy(
+            filteredData,
+            "local"
+        );
+
+
+    const entries =
+        Object.entries(groups)
+            .sort(
+                (a,b)=>
+                    b[1].custo -
+                    a[1].custo
+            )
+            .slice(0,15);
+
+
+    entries.forEach(
+        ([name,data],index)=>{
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.innerHTML=`
+
+                <td>
+
+                    <span class="rank">
+                        ${index+1}
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <strong>
+                        ${escapeHTML(name)}
+                    </strong>
+
+                </td>
+
+                <td>
+                    ${number(data.ocorrencias)}
+                </td>
+
+                <td>
+                    ${number(data.qtd)}
+                </td>
+
+                <td>
+                    ${money(data.custo)}
+                </td>
+
+            `;
+
+
+            tbody.appendChild(tr);
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   TABELA DETALHADA
+===================================================== */
+
+function updateDetailTable(){
+
+    const tbody =
+        document.getElementById(
+            "detailTable"
+        );
+
+
+    tbody.innerHTML="";
+
+
+    const sorted =
+        [...filteredData]
+            .sort(
+                (a,b)=>
+                    b.data-a.data
+            );
+
+
+    sorted.forEach(row=>{
+
+        const tipo =
+            normalize(row.tipo);
+
+
+        let badge="";
+
+
+        if(
+            tipo.includes("AVARIA")
+        ){
+
+            badge =
+                "badge badge-avaria";
+
+        }
+
+        else if(
+            tipo.includes("VENCIDO")
+        ){
+
+            badge =
+                "badge badge-vencido";
+
+        }
+
+        else if(
+            tipo.includes("RETORNO")
+        ){
+
+            badge =
+                "badge badge-retorno";
+
+        }
+
+
+        const tr =
+            document.createElement(
+                "tr"
+            );
+
+
+        tr.innerHTML=`
+
+            <td>
+                ${formatDate(row.data)}
+            </td>
+
+            <td>
+                ${escapeHTML(
+                    row.abastecedor
+                )}
+            </td>
+
+            <td>
+                ${escapeHTML(
+                    row.local
+                )}
+            </td>
+
+            <td>
+                <strong>
+                    ${escapeHTML(
+                        row.produto
+                    )}
+                </strong>
+            </td>
+
+            <td>
+                ${number(row.qtd)}
+            </td>
+
+            <td>
+
+                <span class="${badge}">
+                    ${escapeHTML(row.tipo)}
+                </span>
+
+            </td>
+
+            <td>
+                <strong>
+                    ${money(row.custo)}
+                </strong>
+            </td>
+
+        `;
+
+
+        tbody.appendChild(tr);
+
+    });
+
+}
+
+
+/* =====================================================
+   EXPORTAÃÃO CSV
+===================================================== */
+
+function exportCSV(){
+
+    if(!filteredData.length){
+
+        alert(
+            "NÃ£o hÃ¡ dados para exportar."
+        );
+
+        return;
+
+    }
+
+
+    const rows =
+        filteredData.map(
+            row=>({
+
+                "ABASTECEDOR":
+                    row.abastecedor,
+
+                "LOCAL":
+                    row.local,
+
+                "DATA":
+                    formatDate(
+                        row.data
+                    ),
+
+                "PRODUTO":
+                    row.produto,
+
+                "QUANT.":
+                    row.qtd,
+
+                "TIPO":
+                    row.tipo,
+
+                "CUSTO":
+                    row.custo
+
+            })
+        );
+
+
+    const worksheet =
+        XLSX.utils.json_to_sheet(
+            rows
+        );
+
+
+    const workbook =
+        XLSX.utils.book_new();
+
+
+    XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        "Dados"
+    );
+
+
+    XLSX.writeFile(
+        workbook,
+        "dados_filtrados_perdas.xlsx"
+    );
+
+}
+
+
+/* =====================================================
+   ATUALIZA DASHBOARD
+===================================================== */
+
+function updateDashboard(){
+
+    updateKPIs();
+
+
+    dailyChart();
+
+
+    typeChart();
+
+
+    rankingChart(
+        "productChart",
+        "product",
+        "produto"
+    );
+
+
+    rankingChart(
+        "supplierChart",
+        "supplier",
+        "abastecedor"
+    );
+
+
+    rankingChart(
+        "locationChart",
+        "location",
+        "local"
+    );
+
+
+    productTypeChart();
+
+
+    updatePareto();
+
+
+    updatePriority();
+
+
+    updateProductTable();
+
+
+    updateLocationTable();
+
+
+    updateDetailTable();
+
+}
+
+
+/* =====================================================
+   INICIALIZAÃÃO
+===================================================== */
+
+rawData=[];
+
+filteredData=[];
+
+document.getElementById(
+    "dateStart"
+).value="";
+
+document.getElementById(
+    "dateEnd"
+).value="";
+
+
+document.getElementById(
+    "kpiCost"
+).textContent =
+    "R$ 0,00";
+
+
+document.getElementById(
+    "kpiQty"
+).textContent =
+    "0";
+
+
+document.getElementById(
+    "kpiOccurrences"
+).textContent =
+    "0";
+
+
+document.getElementById(
+    "kpiDaily"
+).textContent =
+    "R$ 0,00";
+
+
+document.getElementById(
+    "kpiAverage"
+).textContent =
+    "R$ 0,00";
+
+
+</script>
+
+</body>
+</html>
+```
